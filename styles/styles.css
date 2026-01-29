@@ -1,5 +1,5 @@
 body {
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0) 100%), url('/images/bg.jpg') no-repeat center center fixed;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0) 100%), url('Dolunay-Website-Project/images/bg.jpg') no-repeat center center fixed;
   background-size: cover;
   color: white;
   font-family: Arial, sans-serif;
