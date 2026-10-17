@@ -57,9 +57,39 @@ function saveWatched() {
 
 const youtubeUrl = (ep) => `https://www.youtube.com/watch?v=${ep.video}`;
 
+// ----- Moon phase: the moon fills from new moon to full moon as you watch -----
+// The lit part is the right half-circle plus an ellipse arc (the "terminator")
+// whose width shrinks to 0 at half-moon and grows again towards full moon.
+function moonPath(fraction) {
+  const cx = 50;
+  const cy = 50;
+  const r = 44;
+  if (fraction <= 0) return '';
+  if (fraction >= 1) return `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
+  const rx = Math.abs(1 - 2 * fraction) * r;
+  const sweep = fraction > 0.5 ? 1 : 0; // gibbous bulges left, crescent bulges right
+  return `M ${cx} ${cy - r} A ${r} ${r} 0 0 1 ${cx} ${cy + r} A ${rx} ${r} 0 0 ${sweep} ${cx} ${cy - r} Z`;
+}
+
+function phaseName(fraction) {
+  if (fraction === 0) return 'New moon: nothing watched yet';
+  if (fraction < 0.25) return 'Waxing crescent';
+  if (fraction < 0.5) return 'Getting there: first quarter';
+  if (fraction < 1) return 'Waxing gibbous: almost full';
+  return 'Full moon: Dolunay complete!';
+}
+
 // ----- Progress bar and "continue" button -----
 function updateProgress() {
   const count = watched.size;
+  const fraction = count / episodes.length;
+  const lit = document.getElementById('moonLit');
+  lit.setAttribute('d', moonPath(fraction));
+  // browsers that support the CSS "d" property animate the phase change smoothly
+  if (window.CSS && CSS.supports('d', 'path("M0 0")')) {
+    lit.style.d = fraction > 0 ? `path("${moonPath(fraction)}")` : 'none';
+  }
+  document.getElementById('phaseName').textContent = phaseName(fraction);
   document.getElementById('progressText').innerHTML =
     count === episodes.length
       ? 'You have watched <b>every episode</b>. Tamam! 🌕'

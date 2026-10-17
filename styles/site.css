@@ -1043,15 +1043,12 @@ button {
 }
 
 .player {
-  position: sticky;
-  bottom: 16px;
-  z-index: 40;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.2fr);
   align-items: center;
   gap: 20px;
   padding: 14px 20px;
-  margin-top: 24px;
+  margin-bottom: 20px;
   background: rgba(16, 20, 31, 0.94);
   backdrop-filter: blur(14px);
 }
@@ -1469,10 +1466,331 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
+
+/* =====================================================================
+   MOTION LAYER
+   Purposeful motion only: things move when they explain something
+   (where you are, what changed, how far you got). All of it is
+   disabled by prefers-reduced-motion at the bottom of this file.
+   ===================================================================== */
+
+/* The hidden attribute must always win, even over display: flex/grid on cards
+   (this is what broke the cast filters) */
+[hidden] {
+  display: none !important;
+}
+
+/* ----- Moonlight spotlight border that follows the pointer ----- */
+.card {
+  position: relative;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(242, 211, 136, 0.65), transparent 45%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 250ms ease;
+  pointer-events: none;
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+/* ----- Sliding pill behind the active nav link / filter ----- */
+.nav,
+.filters {
+  position: relative;
+}
+
+.slider-pill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  border-radius: 999px;
+  pointer-events: none;
+  transition: transform 380ms var(--ease-out), width 380ms var(--ease-out), opacity 200ms ease;
+}
+
+.nav .slider-pill {
+  background: var(--moon-soft);
+  box-shadow: inset 0 0 0 1px rgba(242, 211, 136, 0.18);
+}
+
+.filters .slider-pill {
+  background: var(--moon);
+  box-shadow: 0 6px 24px rgba(242, 211, 136, 0.35);
+}
+
+.nav a,
+.filter {
+  position: relative;
+  z-index: 1;
+}
+
+/* when the pill is active it replaces the static background */
+.has-pill a[aria-current="page"] {
+  background: transparent;
+}
+
+.has-pill .filter[aria-pressed="true"] {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* ----- Hero: starfield, title reveal, 3D poster ----- */
+/* stars and moon sit above the dark overlay but below the text */
+.hero > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hero-title .ch {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.35em) rotateX(-40deg);
+  filter: blur(8px);
+  animation: letter-in 900ms var(--ease-out) forwards;
+  animation-delay: calc(var(--i) * 55ms + 150ms);
+}
+
+@keyframes letter-in {
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+.hero-subtitle,
+.hero .hero-meta,
+.hero .genres,
+.hero-text,
+.hero-actions {
+  animation: rise-in 800ms var(--ease-out) both;
+}
+
+.hero-subtitle { animation-delay: 550ms; }
+.hero .hero-meta { animation-delay: 650ms; }
+.hero .genres { animation-delay: 720ms; }
+.hero-text { animation-delay: 790ms; }
+.hero-actions { animation-delay: 860ms; }
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.poster-wrap {
+  justify-self: end;
+  width: min(360px, 100%);
+  perspective: 1000px;
+}
+
+.poster-wrap .poster {
+  position: relative;
+  width: 100%;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotate(2deg);
+  transform-style: preserve-3d;
+  transition: box-shadow 300ms ease;
+  animation: poster-in 1200ms var(--ease-out) 300ms both;
+}
+
+@keyframes poster-in {
+  from {
+    opacity: 0;
+    clip-path: inset(100% 0 0 0 round 22px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 22px);
+  }
+}
+
+.poster-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 30%), rgba(255, 246, 216, 0.28), transparent 55%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.hero-moon {
+  position: absolute;
+  top: 9%;
+  left: 52%;
+  z-index: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 34%, #fffdf6 0%, #fbeec4 35%, #f2d388 62%, #d9b566 100%);
+  box-shadow: 0 0 40px 6px rgba(255, 236, 180, 0.45), 0 0 140px 50px rgba(242, 211, 136, 0.16);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* ----- Scroll reveal (only for elements on the page at load) ----- */
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 800ms var(--ease-out), transform 800ms var(--ease-out);
+  transition-delay: var(--d, 0ms);
+}
+
+.reveal-ready [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* photos open like a curtain */
+.reveal-ready [data-reveal] .person-photo img,
+.reveal-ready [data-reveal] .episode-thumb img,
+.reveal-ready [data-reveal] .video-btn img {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1000ms var(--ease-out), transform 400ms var(--ease-out), opacity 200ms ease;
+  transition-delay: calc(var(--d, 0ms) + 120ms), 0ms, 0ms;
+}
+
+.reveal-ready [data-reveal].is-visible .person-photo img,
+.reveal-ready [data-reveal].is-visible .episode-thumb img,
+.reveal-ready [data-reveal].is-visible .video-btn img {
+  clip-path: inset(0 0 0 0);
+}
+
+/* ----- Filtering: cards morph into their new places (View Transitions API) ----- */
+::view-transition-group(*) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 300ms;
+}
+
+/* ----- Episodes: moon-phase progress ----- */
+.moon-phase {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 14px rgba(242, 211, 136, 0.35));
+}
+
+.moon-phase .lit {
+  fill: url(#moonGradient);
+  transition: d 600ms var(--ease-out);
+}
+
+.progress-card {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.phase-name {
+  display: block;
+  margin-top: 6px;
+  color: var(--faint);
+  font-size: 13px;
+}
+
+/* ----- Soundtrack: live audio visualiser ----- */
+.visualiser {
+  display: block;
+  width: 100%;
+  height: 56px;
+  margin-bottom: -6px;
+  grid-column: 1 / -1;
+}
+
+/* ----- Buttons: moonlight sheen on hover ----- */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 700ms var(--ease-out);
+  pointer-events: none;
+}
+
+.btn-primary:hover::before {
+  transform: translateX(120%);
+}
+
+@media (max-width: 960px) {
+  .poster-wrap {
+    justify-self: start;
+    width: min(300px, 70%);
+  }
+
+  .hero-moon {
+    left: auto;
+    right: 8%;
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (max-width: 560px) {
+  .progress-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .progress-card .btn {
+    grid-column: 1 / -1;
+  }
+
+  .moon-phase {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+@media (hover: none) {
+  .card::after {
+    display: none;
+  }
+}
+
+
 /* Respect people who turn animations off */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .reveal-ready [data-reveal],
+  .reveal-ready [data-reveal] img,
+  .hero-title .ch,
+  .poster-wrap .poster {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
   }
 
   *,

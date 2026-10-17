@@ -14,14 +14,20 @@ A fan website for **Dolunay** (*Full Moon*), the 2017 Turkish romantic comedy st
 |---|---|
 | **Home** | Story, an "At a glance" fact sheet (network, air dates, director, music…), and the official trailer in a pop-up player |
 | **Cast** | Six character profiles with the actors who play them, filters (Leads / Family / Friends) and an "Also starring" list of ten more characters |
-| **Episodes** | All 26 episodes from the official channel, with search, sort, an **"I've watched this" tracker** with a progress bar, a "Continue with episode N" button and an "Only unwatched" filter (saved in your browser) |
-| **Soundtrack** | A custom music player for seven themes from the score: play all, previous / next, seek bar, real track lengths and autoplay of the next song |
+| **Episodes** | All 26 episodes from the official channel, with search, sort, an **"I've watched this" tracker** shown as a **moon that fills from new moon to full moon** (*Dolunay* means full moon), a "Continue with episode N" button and an "Only unwatched" filter (saved in your browser) |
+| **Soundtrack** | A custom music player for seven themes from the score: play all, previous / next, seek bar, real track lengths, autoplay of the next song and a **live audio visualiser** driven by the music (Web Audio API) |
 | **Videos** | Twelve hand-picked scenes from the official channel, filtered by **Romance, Comedy, Bulut, Drama**, that play right on the page |
 
 **Also:**
 - **Responsive design** with a mobile menu; no sideways scrolling on phones
 - **Accessible:** skip link, keyboard-friendly controls, visible focus rings, the native `<dialog>` element for video (Escape and the backdrop close it), labelled buttons and alt text
-- **Motion with a purpose:** buttons scale slightly when pressed, short ease-out transitions, no constant animation, and everything turns off with *Reduce motion*
+- **Moonlit motion design**, where every animation explains something and everything turns off with *Reduce motion*:
+  - **Hero:** a canvas starfield that twinkles and drifts with the pointer (it pauses when off-screen), a poster that tilts in 3D towards the cursor with a moonlight glare, and the title revealing letter by letter on load
+  - **Navigation and filters:** a gold pill that glides to the active page or filter
+  - **Filtering:** cards morph smoothly into their new places (View Transitions API)
+  - **Cards:** a moonlight spotlight border that follows the cursor
+  - **Scrolling:** sections rise in, and photos open like a curtain (`clip-path`), once as you scroll
+  - **Buttons:** a moonlight sheen on hover, and they press in slightly when clicked
 - **Privacy-friendly embeds** through `youtube-nocookie.com`; videos stop when the player closes
 - **Custom 404 page** and a full-moon favicon
 
@@ -44,6 +50,7 @@ A fan website for **Dolunay** (*Full Moon*), the 2017 Turkish romantic comedy st
 - **Cast page error:** the page loaded the home page's trailer script and crashed; every page now has its own script.
 - **Episode count:** the series has 26 episodes, not 27.
 - **File names:** images and songs were renamed to plain ASCII (for example `Hayatı Sev.mp3` → `hayati-sev.mp3`) so Turkish letters and spaces can never break a link.
+- **Later fixes:** the cast filter buttons did nothing (card CSS overrode the `hidden` attribute), the play button never switched to a pause icon, and on short screens the music player covered the "Play all" button.
 - **Smaller fixes:** a stray `\` on the video page, the sort menu, a missing viewport tag, a Font Awesome icon without its stylesheet, and the wrong clone URL in this README.
 
 ---
@@ -89,8 +96,8 @@ Opening `index.html` directly also works, but a local server is closer to how Gi
 ## 🛠️ Built with
 
 - **HTML5**: semantic pages, `<dialog>`, `<audio>`
-- **CSS3**: custom properties, Grid, Flexbox, `@starting-style`, `prefers-reduced-motion`
-- **Vanilla JavaScript**: no frameworks; `localStorage` for the episode tracker
+- **CSS3**: custom properties, Grid, Flexbox, `clip-path`, `@starting-style`, View Transitions, `prefers-reduced-motion`
+- **Vanilla JavaScript**: no frameworks; Canvas (starfield, visualiser), Web Audio API, `IntersectionObserver`, `localStorage` for the episode tracker
 - **Google Fonts**: Playfair Display and Inter
 
 ---

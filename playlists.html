@@ -49,9 +49,8 @@
         </div>
       </section>
 
-      <ol class="card tracks" id="trackList"></ol>
-
       <div class="card player is-paused" id="player" aria-label="Music player">
+        <canvas class="visualiser" id="visualiser" aria-hidden="true"></canvas>
         <div class="now">
           <img src="images/poster.jpg" alt="" width="48" height="48">
           <div>
@@ -73,6 +72,9 @@
           <span id="duration">0:00</span>
         </div>
       </div>
+
+      <ol class="card tracks" id="trackList"></ol>
+
       <audio id="audio" preload="metadata"></audio>
     </div>
   </main>

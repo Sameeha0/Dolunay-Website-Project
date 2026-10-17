@@ -38,12 +38,19 @@ grid.innerHTML = videos.map((v) => `
     </div>
   </article>`).join('');
 
+// Each card gets its own name so the browser can morph it to its new place when the filter changes
+grid.querySelectorAll('.video').forEach((card, i) => {
+  card.style.viewTransitionName = `video-${i}`;
+});
+
 filterButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const tag = button.dataset.filter;
     filterButtons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
-    grid.querySelectorAll('.video').forEach((card) => {
-      card.hidden = tag !== 'all' && !card.dataset.tags.split(' ').includes(tag);
+    window.animateLayout(() => {
+      grid.querySelectorAll('.video').forEach((card) => {
+        card.hidden = tag !== 'all' && !card.dataset.tags.split(' ').includes(tag);
+      });
     });
   });
 });

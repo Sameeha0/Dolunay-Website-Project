@@ -52,8 +52,9 @@ function showState() {
   const playing = !audio.paused;
   player.classList.toggle('is-paused', !playing);
   playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
-  playBtn.querySelector('.i-play').hidden = playing;
-  playBtn.querySelector('.i-pause').hidden = !playing;
+  // SVG elements have no .hidden property, so set the attribute directly
+  playBtn.querySelector('.i-play').toggleAttribute('hidden', playing);
+  playBtn.querySelector('.i-pause').toggleAttribute('hidden', !playing);
 
   list.querySelectorAll('.track').forEach((row, i) => {
     const isCurrent = i === current;
@@ -103,6 +104,65 @@ document.getElementById('nextBtn').addEventListener('click', () => playTrack(cur
 
 audio.addEventListener('play', showState);
 audio.addEventListener('pause', showState);
+
+// ----- Live visualiser: bars follow the real frequencies of the song -----
+// The Web Audio graph can only be created after a click, so it starts on the first play.
+const canvas = document.getElementById('visualiser');
+const vctx = canvas.getContext('2d');
+const reduceMotionPref = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let analyser = null;
+let freq = null;
+
+function setupAnalyser() {
+  if (analyser || reduceMotionPref) return;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+  const audioCtx = new Ctx();
+  const source = audioCtx.createMediaElementSource(audio);
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 128;
+  analyser.smoothingTimeConstant = 0.82;
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+  freq = new Uint8Array(analyser.frequencyBinCount);
+  audio.addEventListener('play', () => audioCtx.resume());
+}
+
+function drawVisualiser() {
+  if (!analyser) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  if (canvas.width !== Math.round(w * dpr)) {
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  analyser.getByteFrequencyData(freq);
+  vctx.clearRect(0, 0, w, h);
+
+  // mirror the bars from the centre outwards, like a moon reflected on water
+  const bars = 40;
+  const gap = 3;
+  const barW = (w / 2 - gap * bars) / bars;
+  const gradient = vctx.createLinearGradient(0, h, 0, 0);
+  gradient.addColorStop(0, 'rgba(201, 162, 79, 0.15)');
+  gradient.addColorStop(1, 'rgba(247, 226, 168, 0.95)');
+  vctx.fillStyle = gradient;
+  for (let i = 0; i < bars; i++) {
+    const value = freq[Math.floor((i / bars) * freq.length * 0.75)] / 255;
+    const barH = Math.max(2, value * h * 0.95);
+    const offset = i * (barW + gap);
+    vctx.fillRect(w / 2 + offset, h - barH, barW, barH);
+    vctx.fillRect(w / 2 - offset - barW, h - barH, barW, barH);
+  }
+  if (!audio.paused) requestAnimationFrame(drawVisualiser);
+}
+
+audio.addEventListener('play', () => {
+  setupAnalyser();
+  requestAnimationFrame(drawVisualiser);
+});
 audio.addEventListener('ended', () => playTrack(current + 1)); // continue with the next song
 
 // ----- Seek bar -----

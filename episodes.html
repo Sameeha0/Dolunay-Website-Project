@@ -40,9 +40,19 @@
       </header>
 
       <div class="card progress-card">
+        <svg class="moon-phase" viewBox="0 0 100 100" role="img" aria-labelledby="phaseName">
+          <defs>
+            <radialGradient id="moonGradient" cx="0.4" cy="0.38" r="0.7">
+              <stop offset="0" stop-color="#fffaf0"/><stop offset="0.55" stop-color="#f2d388"/><stop offset="1" stop-color="#c9a24f"/>
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="44" fill="#1d2233" stroke="rgba(242,211,136,0.25)"/>
+          <path class="lit" id="moonLit" d=""/>
+        </svg>
         <div>
           <p id="progressText">You have watched <b>0</b> of 26 episodes.</p>
           <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+          <span class="phase-name" id="phaseName">New moon</span>
         </div>
         <a class="btn btn-primary" id="continueBtn" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4l10 6-10 6z" fill="currentColor"/></svg> Start episode 1</a>
       </div>
